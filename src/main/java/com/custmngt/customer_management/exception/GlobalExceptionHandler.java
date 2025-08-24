@@ -1,7 +1,7 @@
 package com.custmngt.customer_management.exception;
 
 
-import com.custmngt.customer_management.dto.ApiResponse;
+import com.custmngt.customer_management.dto.CustomApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -35,9 +35,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<CustomApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         return ResponseEntity.badRequest()
-                .body(new ApiResponse<>("Invalid id format. Expecting UUID.", null));
+                .body(new CustomApiResponse<>("Invalid id format. Expecting UUID.", null));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

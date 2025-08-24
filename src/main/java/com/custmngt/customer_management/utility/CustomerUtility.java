@@ -25,17 +25,19 @@ public class CustomerUtility {
         response.setEmailId(customer.getEmailId());
         response.setAnnualSpend(customer.getAnnualSpend());
         response.setLastPurchaseDate(customer.getLastPurchaseDate());
+        MembershipTier tier = MembershipTier.fromAnnualSpend(customer.getAnnualSpend());
+        response.setTeirType(tier);
         return response;
     }
 
     public static CustomerResponse  mapToResponse(Customer customer, CustomerRequest request) {
         CustomerResponse response = new CustomerResponse();
-        log.info("Customer getID: {} ", request.getUuid());
+       // log.info("Customer getID: {} ", request.getUuid());
 
         customer.setCustomerName(request.getCustomerName());
         customer.setEmailId(request.getEmailId());
         customer.setAnnualSpend(request.getAnnualSpend());
-        customer.setLastPurchaseDate(request.getLastPurchaseDate());
+        customer.setLastPurchaseDate(LocalDate.now());
         return response;
     }
 
