@@ -1,5 +1,8 @@
 package com.custmngt.customer_management.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,13 +15,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CustomerResponse {
-
-    private UUID uuid;
+public class UpdateRequest {
+    @NotBlank
     private String customerName;
-    private String emailId;
-    private Double annualSpend;
-    private LocalDate lastPurchaseDate;
-    private MembershipTier teirType;
 
+    @Email
+    private String emailId;
+
+    @PositiveOrZero
+    private Double annualSpend;
+
+    private LocalDate lastPurchaseDate;
 }
