@@ -1,9 +1,11 @@
 package com.custmngt.customer_management.exception;
 
 
-import com.custmngt.customer_management.dto.ApiResponse;
+import com.custmngt.customer_management.dto.CustomApiResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,22 +19,34 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(CustomerNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleCustomerNotFound(CustomerNotFoundException ex, WebRequest request) {
+    private Map<String, Object> baseError(HttpStatus status, String message, WebRequest req) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", "Not Found");
-        body.put("message", ex.getMessage());
-        body.put("path", request.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", message);
+        body.put("path", req.getDescription(false).replace("uri=", ""));
+        return body;
     }
 
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<CustomApiResponse<String>>  handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String message = "Email already exists!";
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new CustomApiResponse<>(message, null));
+    }
+
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleCustomerNotFound(CustomerNotFoundException ex, WebRequest request) {
+        Map<String, Object> body = baseError(HttpStatus.NOT_FOUND, "Not Found ", request);
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<CustomApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         return ResponseEntity.badRequest()
-                .body(new ApiResponse<>("Invalid id format. Expecting UUID.", null));
+                .body(new CustomApiResponse<>("Invalid id format. Expecting UUID.", null));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -43,20 +57,21 @@ public class GlobalExceptionHandler {
                 .map(fieldError -> fieldError.getDefaultMessage())
                 .findFirst()
                 .orElse("Validation failed");
-
         return ResponseEntity
                 .badRequest()
                 .body(Map.of("error", errorMessage));
     }
 
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, WebRequest request) {
+        Map<String, Object> body = baseError(HttpStatus.METHOD_NOT_ALLOWED, "Method Not Allowed", request);
+        body.put("allowed", ex.getSupportedHttpMethods());
+        return new ResponseEntity<>(body, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex, WebRequest request) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        body.put("error", "Internal Server Error");
-        body.put("message", ex.getMessage());
-        body.put("path", request.getDescription(false).replace("uri=", ""));
+        Map<String, Object> body = baseError(HttpStatus.INTERNAL_SERVER_ERROR, "Method Not Allowed", request);
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

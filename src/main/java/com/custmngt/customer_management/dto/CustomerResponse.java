@@ -1,6 +1,5 @@
 package com.custmngt.customer_management.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +19,6 @@ public class CustomerResponse {
     private String emailId;
     private Double annualSpend;
     private LocalDate lastPurchaseDate;
+    private MembershipTier teirType;
+
 }

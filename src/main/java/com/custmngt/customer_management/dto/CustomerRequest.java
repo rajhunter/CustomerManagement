@@ -17,12 +17,12 @@ import jakarta.validation.constraints.NotBlank;
 @Builder
 public class CustomerRequest {
 
-    private UUID uuid;
+   // private UUID uuid;
     @NotBlank(message = "Customer name cannot be null or empty!")
     private String customerName;
     @NotBlank(message = "Email cannot be null or empty!")
     @Email(message = "Email format is not valid!")
     private String emailId;
     private Double annualSpend;
-    private LocalDate lastPurchaseDate;
+    //private LocalDate lastPurchaseDate;
 }
