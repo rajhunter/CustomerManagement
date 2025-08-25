@@ -3,7 +3,6 @@ package com.custmngt.customer_management.controller;
 import com.custmngt.customer_management.dto.CustomApiResponse;
 import com.custmngt.customer_management.dto.CustomerRequest;
 import com.custmngt.customer_management.dto.CustomerResponse;
-import com.custmngt.customer_management.dto.UpdateRequest;
 import com.custmngt.customer_management.entity.Customer;
 import com.custmngt.customer_management.exception.CustomerNotFoundException;
 import com.custmngt.customer_management.service.CustomerService;
@@ -62,8 +61,8 @@ public class CustomerController {
     @PutMapping("/customers/{uuid}")
     public ResponseEntity<CustomApiResponse<CustomerResponse>> updateCustomer(
             @PathVariable UUID uuid,
-            @RequestBody @Valid UpdateRequest updateRequest) {
-        CustomerResponse response = customerService.updateCustomer(uuid, updateRequest);
+            @RequestBody @Valid CustomerRequest customerRequest) {
+        CustomerResponse response = customerService.updateCustomer(uuid, customerRequest);
         CustomApiResponse<CustomerResponse> customApiResponse = new CustomApiResponse<>(CUSTOMER_UPDATED, response);
         return ResponseEntity.ok(customApiResponse);
     }
@@ -82,9 +81,10 @@ public class CustomerController {
     }
 
     @GetMapping("/getCustomerByEmailId/{emailId}")
-    public List<Customer> getCustomerListByEmailId(@PathVariable String emailId) {
-        return customerService.getCustomerByEmail(emailId)
-                .orElseThrow(() -> new CustomerNotFoundException(CUSTOMER_NOT_FOUND + emailId));
+    public ResponseEntity<CustomApiResponse<List<Customer>>> getCustomersByEmail(@PathVariable String emailId) {
+        List<Customer> customers = customerService.getCustomerByEmail(emailId)
+                .orElseThrow(() -> new CustomerNotFoundException("No customers found with email: " + emailId));
+        return ResponseEntity.ok(new CustomApiResponse<>("Customers found", customers));
     }
 
     @DeleteMapping("/customers/{id}")

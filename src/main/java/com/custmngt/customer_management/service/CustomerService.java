@@ -2,7 +2,6 @@ package com.custmngt.customer_management.service;
 
 import com.custmngt.customer_management.dto.CustomerRequest;
 import com.custmngt.customer_management.dto.CustomerResponse;
-import com.custmngt.customer_management.dto.UpdateRequest;
 import com.custmngt.customer_management.entity.Customer;
 
 import java.util.List;
@@ -16,7 +15,7 @@ public interface CustomerService {
 
     public Optional<List<Customer>> getCustomerByName(String customerName);
     public Optional<List<Customer>> getCustomerByEmail(String emailId);
-    public CustomerResponse updateCustomer(UUID uuid, UpdateRequest updateRequest);
+    public CustomerResponse updateCustomer(UUID uuid, CustomerRequest updateRequest);
     public Optional<CustomerResponse> getCustomerAnnualSpendsByEmail(String emailId);
 
     public Optional<CustomerResponse> getCustomerAnnualSpends(String searchType) ;

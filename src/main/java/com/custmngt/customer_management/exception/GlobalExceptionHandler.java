@@ -2,6 +2,7 @@ package com.custmngt.customer_management.exception;
 
 
 import com.custmngt.customer_management.dto.CustomApiResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -28,6 +29,14 @@ public class GlobalExceptionHandler {
         return body;
     }
 
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<CustomApiResponse<String>>  handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String message = "Email already exists!";
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new CustomApiResponse<>(message, null));
+    }
+
     @ExceptionHandler(CustomerNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleCustomerNotFound(CustomerNotFoundException ex, WebRequest request) {
         Map<String, Object> body = baseError(HttpStatus.NOT_FOUND, "Not Found ", request);
@@ -48,12 +57,10 @@ public class GlobalExceptionHandler {
                 .map(fieldError -> fieldError.getDefaultMessage())
                 .findFirst()
                 .orElse("Validation failed");
-
         return ResponseEntity
                 .badRequest()
                 .body(Map.of("error", errorMessage));
     }
-
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<Map<String, Object>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, WebRequest request) {
@@ -64,7 +71,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex, WebRequest request) {
-
         Map<String, Object> body = baseError(HttpStatus.INTERNAL_SERVER_ERROR, "Method Not Allowed", request);
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }

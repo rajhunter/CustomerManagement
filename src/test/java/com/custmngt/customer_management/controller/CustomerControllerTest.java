@@ -17,11 +17,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 
 public class CustomerControllerTest {
@@ -86,11 +87,109 @@ public class CustomerControllerTest {
                 .emailId("raj@abc.com")
                 .annualSpend(12.00)
                 .build();
-
         mockMvc.perform(post("/api/v1/customers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(badRequest)))
                 .andExpect(status().isBadRequest());
     }
+
+
+    @Test
+    void deleteCustomerReturnsOkResponseBody() throws Exception {
+        UUID customerId = UUID.fromString("88c312a9-f26f-4ce9-96c3-0250f73b019f");
+        String expectedMessage = "Customer deleted successfully";
+        when(service.deleteCustomerById(customerId)).thenReturn(expectedMessage);
+        mockMvc.perform(delete("/api/v1/customers/{id}", customerId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(expectedMessage))
+                .andExpect(jsonPath("$.data").doesNotExist());
+        verify(service, times(1)).deleteCustomerById(customerId);
+    }
+
+    @Test
+    void updateCustomerReturnsOkResponseBody() throws Exception {
+        UUID customerId = UUID.fromString("88c312a9-f26f-4ce9-96c3-0250f73b019f");
+
+        CustomerRequest request = CustomerRequest.builder()
+                .customerName("Updated Raj")
+                .emailId("updated.raj@abc.com")
+                .annualSpend(50.00)
+                .build();
+
+        LocalDate today = LocalDate.now();
+        CustomerResponse mockedResponse = CustomerResponse.builder()
+                .uuid(customerId)
+                .customerName("Updated Raj")
+                .emailId("updated.raj@abc.com")
+                .annualSpend(50.00)
+                .lastPurchaseDate(today)
+                .build();
+        when(service.updateCustomer(eq(customerId), any(CustomerRequest.class)))
+                .thenReturn(mockedResponse);
+
+        mockMvc.perform(put("/api/v1/customers/{uuid}", customerId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Customer updated successfully"))
+                .andExpect(jsonPath("$.data.uuid").value(customerId.toString()))
+                .andExpect(jsonPath("$.data.customerName").value("Updated Raj"))
+                .andExpect(jsonPath("$.data.emailId").value("updated.raj@abc.com"))
+                .andExpect(jsonPath("$.data.annualSpend").value(50.0))
+                .andExpect(jsonPath("$.data.lastPurchaseDate").value(today.toString()));
+
+        verify(service, times(1)).updateCustomer(eq(customerId), any(CustomerRequest.class));
+    }
+
+
+
+    @Test
+    void getCustomerAnnualSpendsByEmailReturnsCustomerResponse() throws Exception {
+        String emailId = "raj@abc.com";
+        UUID customerId = UUID.fromString("88c312a9-f26f-4ce9-96c3-0250f73b019f");
+        LocalDate today = LocalDate.now();
+
+        CustomerResponse mockedResponse = CustomerResponse.builder()
+                .uuid(customerId)
+                .customerName("Raj Yadav")
+                .emailId(emailId)
+                .annualSpend(99.99)
+                .lastPurchaseDate(today)
+                .build();
+
+        when(service.getCustomerAnnualSpendsByEmail(emailId))
+                .thenReturn(Optional.of(mockedResponse));
+
+        mockMvc.perform(get("/api/v1/getCustomerAnnualSpendsByEmail/{emailId}", emailId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.uuid").value(customerId.toString()))
+                .andExpect(jsonPath("$.customerName").value("Raj Yadav"))
+                .andExpect(jsonPath("$.emailId").value(emailId))
+                .andExpect(jsonPath("$.annualSpend").value(99.99))
+                .andExpect(jsonPath("$.lastPurchaseDate").value(today.toString()));
+
+        verify(service, times(1)).getCustomerAnnualSpendsByEmail(emailId);
+    }
+
+
+//    @Test
+//    void getCustomerAnnualSpendsByEmailWhenCustomerNotFoundReturnsNotFound() throws Exception {
+//        String emailId = "notfound@abc.com";
+//
+//        when(service.getCustomerAnnualSpendsByEmail(emailId))
+//                .thenReturn(Optional.empty());
+//
+//        mockMvc.perform(get("/api/v1/getCustomerAnnualSpendsByEmail/{emailId}", emailId))
+//                .andExpect(status().isNotFound())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(jsonPath("$.message").value("Customer not found with email: " + emailId));
+//
+//        verify(service, times(1)).getCustomerAnnualSpendsByEmail(emailId);
+//    }
+
+
 
 }
