@@ -2,6 +2,7 @@ package com.custmngt.customer_management.controller;
 
 import com.custmngt.customer_management.dto.CustomerRequest;
 import com.custmngt.customer_management.dto.CustomerResponse;
+import com.custmngt.customer_management.dto.CustomerUpdateRequest;
 import com.custmngt.customer_management.exception.GlobalExceptionHandler;
 import com.custmngt.customer_management.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -111,10 +112,9 @@ public class CustomerControllerTest {
     void updateCustomerReturnsOkResponseBody() throws Exception {
         UUID customerId = UUID.fromString("88c312a9-f26f-4ce9-96c3-0250f73b019f");
 
-        CustomerRequest request = CustomerRequest.builder()
+        CustomerUpdateRequest request = CustomerUpdateRequest.builder()
                 .customerName("Updated Raj")
                 .emailId("updated.raj@abc.com")
-                .annualSpend(50.00)
                 .build();
 
         LocalDate today = LocalDate.now();
@@ -125,7 +125,7 @@ public class CustomerControllerTest {
                 .annualSpend(50.00)
                 .lastPurchaseDate(today)
                 .build();
-        when(service.updateCustomer(eq(customerId), any(CustomerRequest.class)))
+        when(service.updateCustomer(eq(customerId), any(CustomerUpdateRequest.class)))
                 .thenReturn(mockedResponse);
 
         mockMvc.perform(put("/api/v1/customers/{uuid}", customerId)
@@ -140,7 +140,7 @@ public class CustomerControllerTest {
                 .andExpect(jsonPath("$.data.annualSpend").value(50.0))
                 .andExpect(jsonPath("$.data.lastPurchaseDate").value(today.toString()));
 
-        verify(service, times(1)).updateCustomer(eq(customerId), any(CustomerRequest.class));
+        verify(service, times(1)).updateCustomer(eq(customerId), any(CustomerUpdateRequest.class));
     }
 
 
@@ -159,8 +159,8 @@ public class CustomerControllerTest {
                 .lastPurchaseDate(today)
                 .build();
 
-        when(service.getCustomerAnnualSpendsByEmail(emailId))
-                .thenReturn(Optional.of(mockedResponse));
+       when(service.getCustomerAnnualSpendsByEmail(emailId))
+               .thenReturn(Optional.of(mockedResponse));
 
         mockMvc.perform(get("/api/v1/getCustomerAnnualSpendsByEmail/{emailId}", emailId))
                 .andExpect(status().isOk())
@@ -173,22 +173,6 @@ public class CustomerControllerTest {
 
         verify(service, times(1)).getCustomerAnnualSpendsByEmail(emailId);
     }
-
-
-//    @Test
-//    void getCustomerAnnualSpendsByEmailWhenCustomerNotFoundReturnsNotFound() throws Exception {
-//        String emailId = "notfound@abc.com";
-//
-//        when(service.getCustomerAnnualSpendsByEmail(emailId))
-//                .thenReturn(Optional.empty());
-//
-//        mockMvc.perform(get("/api/v1/getCustomerAnnualSpendsByEmail/{emailId}", emailId))
-//                .andExpect(status().isNotFound())
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(jsonPath("$.message").value("Customer not found with email: " + emailId));
-//
-//        verify(service, times(1)).getCustomerAnnualSpendsByEmail(emailId);
-//    }
 
 
 

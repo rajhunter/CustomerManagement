@@ -2,6 +2,7 @@ package com.custmngt.customer_management.service;
 
 import com.custmngt.customer_management.dto.CustomerRequest;
 import com.custmngt.customer_management.dto.CustomerResponse;
+import com.custmngt.customer_management.dto.CustomerUpdateRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.custmngt.customer_management.entity.Customer;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,14 +70,15 @@ public class CustomerServiceImpl implements CustomerService{
     }
     @Override
     @Transactional(readOnly=true)
-    public Optional<CustomerResponse> getCustomerAnnualSpends(String searchType) {
-        List<Customer> customerList = Collections.emptyList();
+    public List<CustomerResponse> getCustomerAnnualSpends(String searchType) {
+        List<Customer> customerList;
         if (CustomerUtility.isValidEmail(searchType)) {
             customerList = customerRepository.findByEmailId(searchType);
         } else {
             customerList = customerRepository.findByCustomerName(searchType);
         }
-        return annualCalculation( customerList, searchType);
+       // return annualCalculation( customerList, searchType);
+        return CustomerUtility.annualSummarizeByEmail( customerList);
     }
 
     @Override
@@ -89,7 +90,7 @@ public class CustomerServiceImpl implements CustomerService{
 
     @Override
     @Transactional
-    public CustomerResponse updateCustomer(UUID uuid, CustomerRequest request) {
+    public CustomerResponse updateCustomer(UUID uuid, CustomerUpdateRequest request) {
         Customer customer = customerRepository.findById(uuid)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found: " + request));
         CustomerMapper.updateCustomerFromRequest(customer,request);

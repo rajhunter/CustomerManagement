@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.custmngt.customer_management.constants.MessageConstants.*;
 
@@ -38,6 +39,8 @@ public class CustomerUtility {
 
     public static CustomerResponse  mapToResponse(Customer customer, MembershipTier tier, Double totalAnnualSpend) {
         CustomerResponse response = new CustomerResponse();
+        log.info("totalAnnualSpend getID: {} ", totalAnnualSpend);
+        log.info("Customer Date: {} ", customer.getLastPurchaseDate());
         log.info("Customer getID: {} ", customer.getUuid());
         log.info("Customer Date: {} ", customer.getLastPurchaseDate());
         response.setUuid(customer.getUuid());
@@ -51,21 +54,46 @@ public class CustomerUtility {
 
 
     public static Optional<CustomerResponse> annualCalculation(List<Customer> customerList, String searchType) {
+System.out.println("****************************************************");
+        customerList.stream().forEach(System.out::println);
 
         double totalAnnualSpend = customerList.stream()
                 .map(Customer::getAnnualSpend)
                 .filter(Objects::nonNull)
                 .mapToDouble(Double::doubleValue)
                 .sum();
-        LocalDate lastPurchaseDate = customerList.stream()
-                .map(Customer::getLastPurchaseDate)
-                .max(LocalDate::compareTo)
-                .orElse(null);
-        String customerName = customerList.isEmpty() ? null : customerList.get(0).getCustomerName();
+        log.info("totalAnnualSpend",totalAnnualSpend);
         Customer customer = customerList.get(0);
         MembershipTier tier = MembershipTier.fromAnnualSpend(totalAnnualSpend);
         return Optional.of(mapToResponse(customer, tier, totalAnnualSpend));
     }
+
+
+    public static List<CustomerResponse> annualSummarizeByEmail(List<Customer> customers) {
+        return customers.stream()
+                .collect(Collectors.groupingBy(Customer::getEmailId, Collectors.toList()))
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    List<Customer> customerFilter = entry.getValue();
+                    Customer first = customerFilter.get(0);
+                    double totalSpend = customerFilter.stream()
+                            .mapToDouble(Customer::getAnnualSpend)
+                            .sum();
+                    MembershipTier tierType = MembershipTier.fromAnnualSpend(totalSpend);
+
+                    return CustomerResponse.builder()
+                            .uuid(first.getUuid())
+                            .customerName(first.getCustomerName())
+                            .emailId(first.getEmailId())
+                            .annualSpend(totalSpend)
+                            .lastPurchaseDate(first.getLastPurchaseDate())
+                            .teirType(tierType)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
 
     public static boolean isValidEmail(String email) {
         return email != null && EMAIL_PATTERN.matcher(email).matches();

@@ -4,6 +4,7 @@
 /Users/raj/Documents/dev-2025/challange/customer-management/src/main/java/com/custmngt/customer_management/dto/CustomApiResponse.java
 /Users/raj/Documents/dev-2025/challange/customer-management/src/main/java/com/custmngt/customer_management/dto/CustomerRequest.java
 /Users/raj/Documents/dev-2025/challange/customer-management/src/main/java/com/custmngt/customer_management/dto/CustomerResponse.java
+/Users/raj/Documents/dev-2025/challange/customer-management/src/main/java/com/custmngt/customer_management/dto/CustomerUpdateRequest.java
 /Users/raj/Documents/dev-2025/challange/customer-management/src/main/java/com/custmngt/customer_management/dto/MembershipTier.java
 /Users/raj/Documents/dev-2025/challange/customer-management/src/main/java/com/custmngt/customer_management/entity/Customer.java
 /Users/raj/Documents/dev-2025/challange/customer-management/src/main/java/com/custmngt/customer_management/exception/CustomerNotFoundException.java

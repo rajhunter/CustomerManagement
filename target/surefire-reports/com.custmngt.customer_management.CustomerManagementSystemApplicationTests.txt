@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.custmngt.customer_management.CustomerManagementSystemApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.339 s -- in com.custmngt.customer_management.CustomerManagementSystemApplicationTests
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.797 s -- in com.custmngt.customer_management.CustomerManagementSystemApplicationTests

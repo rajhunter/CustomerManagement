@@ -1,5 +1,7 @@
 com/custmngt/customer_management/exception/CustomerNotFoundException.class
+com/custmngt/customer_management/dto/CustomerUpdateRequest.class
 com/custmngt/customer_management/dto/CustomerResponse$CustomerResponseBuilder.class
+com/custmngt/customer_management/dto/CustomerUpdateRequest$CustomerUpdateRequestBuilder.class
 com/custmngt/customer_management/utility/CustomerMapper.class
 com/custmngt/customer_management/dto/CustomApiResponse.class
 com/custmngt/customer_management/CustomerManagementSystemApplication.class

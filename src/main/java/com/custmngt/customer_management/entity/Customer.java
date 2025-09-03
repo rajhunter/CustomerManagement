@@ -1,6 +1,7 @@
 package com.custmngt.customer_management.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Data
 public class Customer {
 
 @Id
@@ -22,7 +24,7 @@ public class Customer {
     private UUID uuid;
     @Column(nullable = false)
     private String customerName;
-    @Column(nullable = false, unique = true)
+    @Email
     private String emailId;
     private Double annualSpend;
     private LocalDate lastPurchaseDate;

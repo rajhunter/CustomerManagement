@@ -3,10 +3,12 @@ package com.custmngt.customer_management.controller;
 import com.custmngt.customer_management.dto.CustomApiResponse;
 import com.custmngt.customer_management.dto.CustomerRequest;
 import com.custmngt.customer_management.dto.CustomerResponse;
+import com.custmngt.customer_management.dto.CustomerUpdateRequest;
 import com.custmngt.customer_management.entity.Customer;
 import com.custmngt.customer_management.exception.CustomerNotFoundException;
 import com.custmngt.customer_management.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.custmngt.customer_management.constants.MessageConstants.*;
@@ -61,8 +64,8 @@ public class CustomerController {
     @PutMapping("/customers/{uuid}")
     public ResponseEntity<CustomApiResponse<CustomerResponse>> updateCustomer(
             @PathVariable UUID uuid,
-            @RequestBody @Valid CustomerRequest customerRequest) {
-        CustomerResponse response = customerService.updateCustomer(uuid, customerRequest);
+            @RequestBody @Valid CustomerUpdateRequest request) {
+        CustomerResponse response = customerService.updateCustomer(uuid, request);
         CustomApiResponse<CustomerResponse> customApiResponse = new CustomApiResponse<>(CUSTOMER_UPDATED, response);
         return ResponseEntity.ok(customApiResponse);
     }
@@ -99,10 +102,15 @@ public class CustomerController {
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with email: " + emailId));
     }
 
-        @GetMapping("/getCustomerAnnualSpends/{searchType}")
-        public CustomerResponse getCustomerAnnualSpends(@PathVariable String searchType) {
-            return customerService.getCustomerAnnualSpends(searchType)
-                    .orElseThrow(() -> new CustomerNotFoundException("Customer not found with email: " + searchType));
-        }
+    @GetMapping("/getCustomerAnnualSpends/{searchType}")
+    @Operation(summary = "Get Customer Annual Spends",
+            description = "Search customer by **email** or **name** to fetch annual spend details.")
+    public List<CustomerResponse> getCustomerAnnualSpends(
+            @Parameter(description = "Customer identifier: either email (e.g. raj@abc.com) or name (raj yadav)")
+            @PathVariable String searchType) {
+     return    Optional.ofNullable(customerService.getCustomerAnnualSpends(searchType))
+                .filter(responses -> !responses.isEmpty())
+                .orElseThrow(() -> new CustomerNotFoundException("No records found for: " + searchType));
+    }
 
     }
